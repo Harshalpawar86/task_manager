@@ -39,7 +39,7 @@ A task management app built using Flutter, providing users with a simple and eff
     ```
 
 ## APK
-You can download the APK for testing the app directly on your Android device from https://drive.google.com/file/d/1O55A5raboZ-rpz-rKWgeHGjjd0APRVkT/view?usp=sharing
+You can download the APK for testing the app directly on your Android device from https://drive.google.com/file/d/1ITyQvxxQP5Lk8dLENK9OTF21mP5VU_ei/view?usp=sharing
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
