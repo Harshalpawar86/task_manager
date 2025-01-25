@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:task_manager/Controller/tasks_controller.dart';
 import 'package:task_manager/Model/task_model.dart';
 
@@ -21,8 +22,8 @@ class _TaskTileState extends State<TaskTile> {
       padding: const EdgeInsets.all(5),
       width: width,
       decoration: BoxDecoration(
-          color: (widget.taskModel.isDone)
-              ? Colors.greenAccent[100]
+          color: (widget.taskModel.isDone != 1)
+              ? Colors.lightGreenAccent[100]
               : Theme.of(context).canvasColor,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Color.fromRGBO(49, 49, 49, 0.7))),
@@ -45,32 +46,15 @@ class _TaskTileState extends State<TaskTile> {
                     color: Colors.blueAccent,
                     shape: BoxShape.circle),
               ),
-              (widget.taskModel.date != null)
-                  ? Text(
-                      widget.taskModel.date!,
-                      style: Theme.of(context).textTheme.displaySmall,
-                    )
-                  : const SizedBox(),
-              Row(
-                spacing: 5,
-                children: [
-                  Text(
-                    "Priority :",
-                    style: Theme.of(context).textTheme.displaySmall,
-                  ),
-                  Container(
-                    height: 15,
-                    width: 15,
-                    decoration: BoxDecoration(
-                        color: (widget.taskModel.priority == 1)
-                            ? Colors.red
-                            : (widget.taskModel.priority == 2)
-                                ? Colors.amber
-                                : Colors.green,
-                        shape: BoxShape.circle),
-                  ),
-                ],
-              ),
+              Text(
+                widget.taskModel.date!,
+                style: GoogleFonts.merriweather(
+                    fontSize:
+                        Theme.of(context).textTheme.displaySmall!.fontSize,
+                    fontWeight:
+                        Theme.of(context).textTheme.displaySmall!.fontWeight,
+                    color: Colors.black),
+              )
             ],
           ),
           const SizedBox(
@@ -96,18 +80,15 @@ class _TaskTileState extends State<TaskTile> {
             ),
           ),
           Checkbox(
-              value: widget.taskModel.isDone,
+              value: (widget.taskModel.isDone == 1) ? true : false,
               activeColor: Colors.green,
               checkColor: Colors.white,
               onChanged: (value) async {
                 bool isChecked = value ?? false;
-                await widget.taskController.completeTask(
-                    key: widget.taskModel.key,
-                    isChecked: isChecked,
-                    taskModelObj: widget.taskModel);
+                await widget.taskController
+                    .completeTask(taskModelObj: widget.taskModel);
 
-                widget.taskModel.isDone = isChecked;
-
+                widget.taskModel.isDone = (isChecked) ? 1 : 0;
               }),
         ],
       ),

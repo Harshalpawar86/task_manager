@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
+import 'package:task_manager/Controller/local_data.dart';
 import 'package:task_manager/Controller/tasks_controller.dart';
 import 'package:task_manager/Controller/theme_controller.dart';
-import 'package:task_manager/Model/task_model.dart';
 import 'package:task_manager/View/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  Hive.registerAdapter(TaskModelAdapter());
-  await Hive.openBox<TaskModel>("Tasks");
+  await LocalData.startDatabase();
   runApp(const MainApp());
 }
 

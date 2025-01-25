@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:task_manager/Controller/tasks_controller.dart';
 import 'package:task_manager/Model/task_model.dart';
+import 'package:uuid/uuid.dart';
 
 class MyBottomsheet extends StatefulWidget {
   final bool forEdit;
@@ -12,17 +13,16 @@ class MyBottomsheet extends StatefulWidget {
   final String title;
   final String description;
   final String date;
-  final dynamic taskKey;
-  final int prevPriority;
-  const MyBottomsheet(
-      {super.key,
-      required this.forEdit,
-      required this.taskController,
-      this.title = '',
-      this.description = '',
-      this.date = '',
-      this.taskKey = '',
-      this.prevPriority = 0});
+  final String taskid;
+  const MyBottomsheet({
+    super.key,
+    required this.forEdit,
+    required this.taskController,
+    this.title = '',
+    this.description = '',
+    this.date = '',
+    required this.taskid,
+  });
 
   @override
   State<MyBottomsheet> createState() => _MyBottomsheetState();
@@ -33,7 +33,6 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
-  int priority = 3;
 
   void _clearControllers() {
     _titleController.clear();
@@ -41,14 +40,23 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
     _dateController.clear();
   }
 
+  String getUniqueId() {
+    var uuid = Uuid();
+    String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    return '${uuid.v4()}_$timestamp';
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    String taskid;
     if (widget.forEdit) {
       _titleController.text = widget.title;
       _descriptionController.text = widget.description;
       _dateController.text = widget.date;
-      priority = widget.prevPriority;
+      taskid = widget.taskid;
+    } else {
+      taskid = getUniqueId();
     }
     return BottomSheet(
       enableDrag: false,
@@ -89,10 +97,7 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                     padding: const EdgeInsets.only(left: 10),
                     width: width,
                     decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        border:
-                            Border.all(color: Color.fromRGBO(49, 49, 49, 0.5))),
+                       ),
                     child: Center(
                       child: TextFormField(
                         controller: _titleController,
@@ -101,7 +106,9 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                         cursorColor: Color.fromRGBO(49, 49, 49, 0.5),
                         decoration: InputDecoration(
                           border: InputBorder.none,
+                          fillColor: Colors.white
                         ),
+                        
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Please enter title";
@@ -157,6 +164,13 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                             Border.all(color: Color.fromRGBO(49, 49, 49, 0.5))),
                     child: TextFormField(
                       controller: _dateController,
+                      validator: (value) {
+                        if (value == null) {
+                          return "Please enter date";
+                        } else {
+                          return null;
+                        }
+                      },
                       keyboardType: TextInputType.none,
                       onTap: () async {
                         DateTime? selectedDate = await _selectDate();
@@ -189,70 +203,6 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                   const SizedBox(
                     height: 15,
                   ),
-                  (widget.forEdit)
-                      ? const SizedBox()
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            DropdownButton<String>(
-                              iconDisabledColor: Colors.black,
-                              dropdownColor: Theme.of(context).canvasColor,
-                              hint: Text(
-                                "Set Priority",
-                                style: Theme.of(context).textTheme.labelMedium,
-                              ),
-                              items: [
-                                DropdownMenuItem(
-                                  value: "High",
-                                  child: Text("High",
-                                      style: GoogleFonts.merriweather(
-                                          fontSize: 15,
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.w800)),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Medium",
-                                  child: Text("Medium",
-                                      style: GoogleFonts.merriweather(
-                                          fontSize: 15,
-                                          color: Colors.amber,
-                                          fontWeight: FontWeight.w800)),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Low",
-                                  child: Text("Low",
-                                      style: GoogleFonts.merriweather(
-                                          fontSize: 15,
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.w800)),
-                                ),
-                              ],
-                              onChanged: (value) {
-                                if (value != null) {
-                                  if (value == "High") {
-                                    priority = 1;
-                                  } else if (value == "Medium") {
-                                    priority = 2;
-                                  } else {
-                                    priority = 3;
-                                  }
-                                  setState(() {});
-                                }
-                              },
-                            ),
-                            Container(
-                              height: 15,
-                              width: 15,
-                              decoration: BoxDecoration(
-                                  color: (priority == 1)
-                                      ? Colors.red
-                                      : (priority == 2)
-                                          ? Colors.amber
-                                          : Colors.green,
-                                  shape: BoxShape.circle),
-                            ),
-                          ],
-                        ),
                   const SizedBox(
                     height: 15,
                   ),
@@ -261,19 +211,18 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                         if (_key.currentState!.validate()) {
                           if (widget.forEdit) {
                             TaskModel taskModelObj = TaskModel(
+                                taskId: taskid,
                                 taskName: _titleController.text,
-                                priority: priority,
-                                isDone: false,
+                                isDone: 0, //false
                                 date: _dateController.text,
                                 taskDescription: _descriptionController.text);
-                            widget.taskController.updateTaskData(
-                                key: widget.taskKey,
-                                taskModelObj: taskModelObj);
+                            await widget.taskController
+                                .updateTaskData(taskModelObj: taskModelObj);
                           } else {
                             TaskModel taskModelObj = TaskModel(
+                                taskId: taskid,
                                 taskName: _titleController.text,
-                                priority: priority,
-                                isDone: false,
+                                isDone: 0, //false
                                 date: _dateController.text,
                                 taskDescription: _descriptionController.text);
                             await widget.taskController

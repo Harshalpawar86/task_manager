@@ -1,26 +1,22 @@
-import "package:hive/hive.dart";
-part "task_model.g.dart";
-
-@HiveType(typeId: 0)
-class TaskModel extends HiveObject {
-  @HiveField(0)
+class TaskModel {
   String taskName;
-
-  @HiveField(1)
+  String taskId;
   String? taskDescription;
-
-  @HiveField(2)
-  String? date;
-
-  @HiveField(3)
-  int priority;
-
-  @HiveField(4)
-  bool isDone;
+  String date;
+  int isDone;
   TaskModel(
       {required this.taskName,
-      required this.priority,
+      required this.taskId,
       required this.isDone,
       required this.date,
       required this.taskDescription});
+  Map<String, dynamic> taskMap() {
+    return {
+      "task_id": taskId,
+      "task_title": taskName,
+      "is_completed": isDone,
+      "task_description": taskDescription,
+      "task_date": date
+    };
+  }
 }

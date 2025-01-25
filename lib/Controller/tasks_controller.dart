@@ -1,46 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:task_manager/Controller/local_data.dart';
 import 'package:task_manager/Model/task_model.dart';
-import 'package:uuid/uuid.dart';
 
 class TasksController extends ChangeNotifier {
   Future<void> addTask({required TaskModel taskModelObj}) async {
-    Box<TaskModel> taskBox = Hive.box<TaskModel>("Tasks");
-    final String key = Uuid().v1();
-    await taskBox.put(key, taskModelObj);
-    notifyListeners();
+    bool added = await LocalData.insertData(taskModelObj);
+    if (added) {
+      notifyListeners();
+    } else {
+      //show delightful toast
+    }
   }
 
-  List<TaskModel> getTasksList() {
-    Box<TaskModel> taskBox = Hive.box<TaskModel>("Tasks");
-    return taskBox.values.cast<TaskModel>().toList();
+  Future<List<TaskModel>> getTasksList() async {
+    List<TaskModel> taskModelList = await LocalData.getTasks();
+    return taskModelList;
   }
 
-  Future<void> updateTaskData(
-      {required dynamic key, required TaskModel taskModelObj}) async {
-    Box<TaskModel> taskBox = Hive.box<TaskModel>("Tasks");
-    await taskBox.put(key, taskModelObj);
-    notifyListeners();
+  Future<void> updateTaskData({required TaskModel taskModelObj}) async {
+    bool updated = await LocalData.updateTask(taskModelObj);
+    if (updated) {
+      notifyListeners();
+    } else {
+      //show delightful toast
+    }
   }
 
-  Future<void> deleteTaskData({required dynamic key}) async {
-    Box<TaskModel> taskBox = Hive.box<TaskModel>("Tasks");
-    await taskBox.delete(key);
-    notifyListeners();
+  Future<void> deleteTaskData({required TaskModel taskModelObj}) async {
+    bool deleted = await LocalData.deleteTask(taskModelObj);
+    if (deleted) {
+      notifyListeners();
+    } else {
+      //show delightful toast
+    }
   }
 
-  Future<void> completeTask(
-      {required dynamic key,
-      required bool isChecked,
-      required TaskModel taskModelObj}) async {
-    Box<TaskModel> taskBox = Hive.box<TaskModel>("Tasks");
-    TaskModel obj = TaskModel(
-        taskName: taskModelObj.taskName,
-        priority: taskModelObj.priority,
-        isDone: isChecked,
-        date: taskModelObj.date,
-        taskDescription: taskModelObj.taskDescription);
-    await taskBox.put(key, obj);
-    notifyListeners();
+  Future<void> completeTask({required TaskModel taskModelObj}) async {
+    bool completed = await LocalData.finishTask(taskModelObj);
+    if (completed) {
+      notifyListeners();
+    } else {
+      //show delightful toast
+    }
   }
 }
