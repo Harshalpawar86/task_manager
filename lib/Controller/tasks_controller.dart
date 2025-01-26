@@ -35,8 +35,9 @@ class TasksController extends ChangeNotifier {
     }
   }
 
-  Future<void> completeTask({required TaskModel taskModelObj}) async {
-    bool completed = await LocalData.finishTask(taskModelObj);
+  Future<void> completeTask(
+      {required String taskId, required bool isDone}) async {
+    bool completed = await LocalData.finishTask(taskId: taskId, isDone: isDone);
     if (completed) {
       notifyListeners();
     } else {

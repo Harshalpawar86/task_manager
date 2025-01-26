@@ -32,6 +32,7 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
 
   void _clearControllers() {
@@ -46,6 +47,7 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
     return '${uuid.v4()}_$timestamp';
   }
 
+  TimeOfDay? prevTime;
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -93,37 +95,41 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                     "Title",
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  Container(
-                    padding: const EdgeInsets.only(left: 10),
-                    width: width,
-                    decoration: BoxDecoration(
-                       ),
-                    child: Center(
-                      child: TextFormField(
-                        controller: _titleController,
-                        keyboardType: TextInputType.name,
-                        showCursor: true,
-                        cursorColor: Color.fromRGBO(49, 49, 49, 0.5),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          fillColor: Colors.white
-                        ),
-                        
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter title";
-                          } else {
-                            return null;
-                          }
-                        },
-                      ),
+                  TextFormField(
+                    controller: _titleController,
+                    keyboardType: TextInputType.name,
+                    showCursor: true,
+                    cursorColor: Color.fromRGBO(49, 49, 49, 0.5),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: EdgeInsets.all(5),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter title";
+                      } else {
+                        return null;
+                      }
+                    },
                   ),
                   const SizedBox(
                     height: 15,
                   ),
                   Text(
-                    "Description",
+                    "Description (Optional)",
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                   Container(
@@ -154,54 +160,122 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                     "Due Date",
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  Container(
-                    padding: const EdgeInsets.only(left: 10),
-                    width: width,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        border:
-                            Border.all(color: Color.fromRGBO(49, 49, 49, 0.5))),
-                    child: TextFormField(
-                      controller: _dateController,
-                      validator: (value) {
-                        if (value == null) {
-                          return "Please enter date";
-                        } else {
-                          return null;
-                        }
-                      },
-                      keyboardType: TextInputType.none,
-                      onTap: () async {
-                        DateTime? selectedDate = await _selectDate();
-                        log("Selected Date : ${selectedDate.toString()}");
-                        if (selectedDate != null) {
-                          String formattedDate =
-                              DateFormat('dd/MM/yyyy').format(selectedDate);
-                          _dateController.text = formattedDate;
-                        }
-                      },
-                      readOnly: true,
-                      cursorHeight: 0,
-                      showCursor: true,
-                      cursorColor: Color.fromRGBO(49, 49, 49, 0.5),
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                            onPressed: () async {
-                              DateTime? selectedDate = await _selectDate();
-                              if (selectedDate != null) {
-                                String formattedDate = DateFormat('dd/MM/yyyy')
-                                    .format(selectedDate);
-                                _dateController.text = formattedDate;
-                              }
-                            },
-                            icon: const Icon(Icons.calendar_month)),
-                        border: InputBorder.none,
-                      ),
+                  TextFormField(
+                    controller: _dateController,
+                    validator: (value) {
+                      log("Value ---------$value");
+                      if (value == '' || value == null) {
+                        return "Please enter date";
+                      } else {
+                        return null;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      suffixIcon: IconButton(
+                          onPressed: () async {
+                            DateTime? selectedDate = await _selectDate();
+                            log("Selected Date : $selectedDate");
+                            if (selectedDate != null) {
+                              String formattedDate =
+                                  DateFormat('dd/MM/yyyy').format(selectedDate);
+                              _dateController.text = formattedDate;
+                            }
+                          },
+                          icon: const Icon(Icons.calendar_month)),
+                      contentPadding: EdgeInsets.all(5),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
                     ),
+                    keyboardType: TextInputType.none,
+                    onTap: () async {
+                      DateTime? selectedDate = await _selectDate();
+                      log("Selected Date : ${selectedDate.toString()}");
+                      if (selectedDate != null) {
+                        String formattedDate =
+                            DateFormat('dd/MM/yyyy').format(selectedDate);
+                        _dateController.text = formattedDate;
+                      } else {
+                        String formattedDate =
+                            DateFormat('dd/MM/yyyy').format(DateTime.now());
+                        _dateController.text = formattedDate;
+                      }
+                    },
+                    readOnly: true,
+                    cursorHeight: 0,
+                    showCursor: true,
+                    cursorColor: Color.fromRGBO(49, 49, 49, 0.5),
                   ),
                   const SizedBox(
                     height: 15,
+                  ),
+                  Text(
+                    "Notification Time (Optional)",
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  TextFormField(
+                    controller: _timeController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      suffixIcon: IconButton(
+                          onPressed: () async {
+                            TimeOfDay? selectedTime = await _selectTime();
+                            prevTime = selectedTime;
+                            log("Selected Date : $selectedTime");
+                            if (selectedTime != null) {
+                              if (context.mounted) {
+                                String formattedTime =
+                                    MaterialLocalizations.of(context)
+                                        .formatTimeOfDay(selectedTime);
+                                _timeController.text = formattedTime;
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.alarm_sharp)),
+                      contentPadding: EdgeInsets.all(5),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide(
+                              color: Color.fromRGBO(49, 49, 49, 0.5))),
+                    ),
+                    keyboardType: TextInputType.none,
+                    onTap: () async {
+                      TimeOfDay? selectedTime = await _selectTime();
+                      prevTime = selectedTime;
+                      log("Selected Date : $selectedTime");
+                      if (selectedTime != null) {
+                        if (context.mounted) {
+                          String formattedTime =
+                              MaterialLocalizations.of(context)
+                                  .formatTimeOfDay(selectedTime);
+                          _timeController.text = formattedTime;
+                        }
+                      }
+                    },
+                    readOnly: true,
+                    cursorHeight: 0,
+                    showCursor: true,
+                    cursorColor: Color.fromRGBO(49, 49, 49, 0.5),
                   ),
                   const SizedBox(
                     height: 15,
@@ -254,6 +328,26 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  Future<TimeOfDay?> _selectTime() async {
+    return await showTimePicker(
+      context: context,
+      initialTime: (_timeController.text == '')
+          ? TimeOfDay.now()
+          : (prevTime == null)
+              ? TimeOfDay.now()
+              : prevTime!,
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData(
+            colorScheme: const ColorScheme.light(primary: Colors.blueAccent),
+            timePickerTheme: Theme.of(context).timePickerTheme,
+          ),
+          child: child!,
         );
       },
     );

@@ -18,7 +18,8 @@ class LocalData {
               task_title TEXT,
               is_completed INT,
               task_description TEXT,
-              task_date TEXT
+              task_date TEXT,
+              notify_time TEXT
           )
         ''');
       },
@@ -91,13 +92,14 @@ class LocalData {
     return deleted;
   }
 
-  static Future<bool> finishTask(TaskModel obj) async {
+  static Future<bool> finishTask(
+      {required String taskId, required bool isDone}) async {
     bool updated = false;
     try {
       final sqflite.Database localDb = await database;
-      int ans = await localDb.update("TaskTable", {"is_completed": obj.isDone},
+      int ans = await localDb.update("TaskTable", {"is_completed": isDone},
           where: "task_id = ?",
-          whereArgs: [obj.taskId],
+          whereArgs: [taskId],
           conflictAlgorithm: ConflictAlgorithm.replace);
       log("Updated Data return value : $ans");
       updated = true;

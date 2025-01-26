@@ -66,6 +66,18 @@ class MainApp extends StatelessWidget {
             dividerColor: Colors.blueAccent,
             headerBackgroundColor: Colors.blueAccent,
             headerForegroundColor: Colors.white),
+        timePickerTheme: TimePickerThemeData(
+            backgroundColor: Color.fromRGBO(240, 249, 254, 1),
+            dialHandColor: Colors.blueGrey[200],
+            hourMinuteColor: Colors.blueAccent,
+            dayPeriodColor: Colors.blueAccent,
+            dayPeriodTextColor: Colors.black,
+            entryModeIconColor: Colors.blueAccent,
+            dialBackgroundColor: Colors.white,
+            dialTextColor: Colors.blueAccent,
+            timeSelectorSeparatorColor:
+                WidgetStatePropertyAll(Colors.blueAccent),
+            hourMinuteTextColor: Colors.white),
         appBarTheme: AppBarTheme(
             backgroundColor: Colors.blueAccent,
             foregroundColor: Colors.white,
@@ -110,6 +122,21 @@ class MainApp extends StatelessWidget {
           rangePickerHeaderForegroundColor: Colors.white,
           headerForegroundColor: Colors.white,
           headerBackgroundColor: Colors.black),
+      timePickerTheme: TimePickerThemeData(
+          backgroundColor: Color.fromRGBO(240, 249, 254, 1),
+          dialHandColor: Colors.blueGrey[200],
+          hourMinuteColor: Colors.black,
+          dayPeriodColor: Colors.black,
+          dayPeriodTextColor: Colors.grey[50],
+          entryModeIconColor: Colors.black,
+          dialBackgroundColor: Colors.white,
+          dialTextColor: Colors.black,
+          timeSelectorSeparatorColor: WidgetStatePropertyAll(Colors.black),
+          confirmButtonStyle: ButtonStyle(
+              foregroundColor: WidgetStatePropertyAll(Colors.black)),
+          cancelButtonStyle: ButtonStyle(
+              foregroundColor: WidgetStatePropertyAll(Colors.black)),
+          hourMinuteTextColor: Colors.white),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
