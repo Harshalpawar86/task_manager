@@ -14,9 +14,11 @@ class MyBottomsheet extends StatefulWidget {
   final String description;
   final String date;
   final String taskid;
+  final List<String> notifyList;
   const MyBottomsheet({
     super.key,
     required this.forEdit,
+    required this.notifyList,
     required this.taskController,
     this.title = '',
     this.description = '',
@@ -48,14 +50,21 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
   }
 
   TimeOfDay? prevTime;
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     String taskid;
     if (widget.forEdit) {
-      _titleController.text = widget.title;
-      _descriptionController.text = widget.description;
-      _dateController.text = widget.date;
+      if (_titleController.text.isEmpty) {
+        _titleController.text = widget.title;
+      }
+      if (_descriptionController.text.isEmpty) {
+        _descriptionController.text = widget.description;
+      }
+      if (_dateController.text.isEmpty) {
+        _dateController.text = widget.date;
+      }
       taskid = widget.taskid;
     } else {
       taskid = getUniqueId();
@@ -224,13 +233,40 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                     "Notification Time (Optional)",
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  TextFormField(
-                    controller: _timeController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      suffixIcon: IconButton(
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 35,
+                          child: ListView.builder(
+                              itemCount: widget.notifyList.length,
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 10.0),
+                                  child: Container(
+                                    padding: EdgeInsets.all(5),
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                        color: Colors.blue.shade100),
+                                    child: Text(
+                                      widget.notifyList[index],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .displayMedium,
+                                    ),
+                                  ),
+                                );
+                              }),
+                        ),
+                      ),
+                      IconButton(
                           onPressed: () async {
+                            if (_dateController.text.isEmpty) {
+                              log("Select Date First");
+                              return;
+                            }
                             TimeOfDay? selectedTime = await _selectTime();
                             prevTime = selectedTime;
                             log("Selected Date : $selectedTime");
@@ -239,43 +275,13 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                                 String formattedTime =
                                     MaterialLocalizations.of(context)
                                         .formatTimeOfDay(selectedTime);
-                                _timeController.text = formattedTime;
+                                widget.notifyList.add(formattedTime);
+                                setState(() {});
                               }
                             }
                           },
-                          icon: const Icon(Icons.alarm_sharp)),
-                      contentPadding: EdgeInsets.all(5),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(
-                              color: Color.fromRGBO(49, 49, 49, 0.5))),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(
-                              color: Color.fromRGBO(49, 49, 49, 0.5))),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(
-                              color: Color.fromRGBO(49, 49, 49, 0.5))),
-                    ),
-                    keyboardType: TextInputType.none,
-                    onTap: () async {
-                      TimeOfDay? selectedTime = await _selectTime();
-                      prevTime = selectedTime;
-                      log("Selected Date : $selectedTime");
-                      if (selectedTime != null) {
-                        if (context.mounted) {
-                          String formattedTime =
-                              MaterialLocalizations.of(context)
-                                  .formatTimeOfDay(selectedTime);
-                          _timeController.text = formattedTime;
-                        }
-                      }
-                    },
-                    readOnly: true,
-                    cursorHeight: 0,
-                    showCursor: true,
-                    cursorColor: Color.fromRGBO(49, 49, 49, 0.5),
+                          icon: const Icon(Icons.alarm))
+                    ],
                   ),
                   const SizedBox(
                     height: 15,
@@ -289,7 +295,9 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                                 taskName: _titleController.text,
                                 isDone: 0, //false
                                 date: _dateController.text,
+                                timeList: widget.notifyList,
                                 taskDescription: _descriptionController.text);
+                            log("Description Controller : ${_descriptionController.text}");
                             await widget.taskController
                                 .updateTaskData(taskModelObj: taskModelObj);
                           } else {
@@ -298,9 +306,11 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                                 taskName: _titleController.text,
                                 isDone: 0, //false
                                 date: _dateController.text,
+                                timeList: widget.notifyList,
                                 taskDescription: _descriptionController.text);
                             await widget.taskController
                                 .addTask(taskModelObj: taskModelObj);
+                            _clearControllers();
                           }
                           if (context.mounted) {
                             if (Navigator.canPop(context)) {

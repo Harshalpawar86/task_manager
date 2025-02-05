@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class TaskModel {
   String taskName;
   String taskId;
@@ -13,6 +15,8 @@ class TaskModel {
       this.timeList,
       required this.taskDescription});
   Map<String, dynamic> taskMap() {
+    log("Time List : -------- $timeList");
+    log("Date : ------- $date");
     return {
       "task_id": taskId,
       "task_title": taskName,

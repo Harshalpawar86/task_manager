@@ -1,8 +1,21 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:task_manager/Controller/local_data.dart';
 import 'package:task_manager/Model/task_model.dart';
 
 class TasksController extends ChangeNotifier {
+  Future<void> removeNotificationTime(
+      {required String taskId, required String time}) async {
+    bool removed = await LocalData.removeNotificationTimeFromDatabase(
+        taskId: taskId, timeToRemove: time);
+    if (removed) {
+      notifyListeners();
+    } else {
+      //show delightful toast
+    }
+  }
+
   Future<void> addTask({required TaskModel taskModelObj}) async {
     bool added = await LocalData.insertData(taskModelObj);
     if (added) {

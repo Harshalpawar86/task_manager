@@ -94,7 +94,7 @@ class MainApp extends StatelessWidget {
           labelMedium: GoogleFonts.merriweather(
               fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black),
           displayLarge: GoogleFonts.merriweather(
-              fontSize: 25, fontWeight: FontWeight.w900, color: Colors.white),
+              fontSize: 25, fontWeight: FontWeight.w900, color: Colors.black),
           displayMedium: GoogleFonts.merriweather(
               fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black),
           displaySmall: GoogleFonts.merriweather(

@@ -1,0 +1,1 @@
+// call the requestExactAlarmsPermission() exposed by the AndroidFlutterNotificationsPlugin class so that the user can grant the permission via the app

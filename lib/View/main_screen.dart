@@ -40,6 +40,13 @@ class _MainScreenState extends State<MainScreen> {
                 color:
                     (themeController.darkTheme) ? Colors.white : Colors.yellow,
               )),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  setState(() {});
+                },
+                icon: const Icon(Icons.refresh))
+          ],
           title: Text(
             "My Task Manager",
           ),
@@ -49,6 +56,7 @@ class _MainScreenState extends State<MainScreen> {
             await displayBottomSheet(
                 taskid: getUniqueId(),
                 forEdit: false,
+                notifyList: [],
                 taskController: taskController);
           },
           child: const Icon(Icons.add),
@@ -86,18 +94,18 @@ class _MainScreenState extends State<MainScreen> {
                                   ),
                                   onPress: () async {
                                     String? date;
-                                    if (taskList[index].date != null) {
-                                      date = taskList[index].date!;
-                                    }
+                                    date = taskList[index].date;
                                     await displayBottomSheet(
                                         forEdit: true,
                                         taskController: taskController,
                                         taskid: taskList[index].taskId,
                                         title: taskList[index].taskName,
+                                        notifyList:
+                                            taskList[index].timeList ?? [],
                                         description:
                                             taskList[index].taskDescription ??
                                                 "",
-                                        date: date ?? "");
+                                        date: date);
                                     // Scaffold.of(context).showBottomSheet((context) =>
                                     //     MyBottomsheet
                                   },
@@ -191,6 +199,7 @@ class _MainScreenState extends State<MainScreen> {
     String title = '',
     String description = '',
     required String taskid,
+    required List<String> notifyList,
     String date = '',
   }) async {
     await showModalBottomSheet(
@@ -203,13 +212,17 @@ class _MainScreenState extends State<MainScreen> {
             forEdit: forEdit,
             taskController: taskController,
             title: title,
+            notifyList: notifyList,
             description: description,
             date: date,
             taskid: taskid,
           );
         } else {
           return MyBottomsheet(
-              taskid: taskid, forEdit: forEdit, taskController: taskController);
+              notifyList: notifyList,
+              taskid: taskid,
+              forEdit: forEdit,
+              taskController: taskController);
         }
       },
     );
