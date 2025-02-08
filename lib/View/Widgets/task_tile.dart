@@ -106,8 +106,8 @@ class _TaskTileState extends State<TaskTile> {
                 const SizedBox(
                   height: 7,
                 ),
-                (widget.taskModel.timeList == null ||
-                        widget.taskModel.timeList!.isEmpty)
+                (widget.taskModel.timeMap == null ||
+                        widget.taskModel.timeMap!.isEmpty)
                     ? const SizedBox()
                     : GestureDetector(
                         onTap: () async {
@@ -184,8 +184,8 @@ class _NotificationDialogState extends State<NotificationDialog> {
       height: MediaQuery.of(context).size.height / 1.5,
       width: MediaQuery.of(context).size.width / 1.5,
       child: ListView.builder(
-          itemCount: (widget.taskModel.timeList != null)
-              ? widget.taskModel.timeList!.length
+          itemCount: (widget.taskModel.timeMap != null)
+              ? widget.taskModel.timeMap!.length
               : 0,
           shrinkWrap: true,
           itemBuilder: (context, index) {
@@ -198,7 +198,7 @@ class _NotificationDialogState extends State<NotificationDialog> {
                     borderRadius: BorderRadius.circular(10)),
                 child: Row(
                   children: [
-                    Text(widget.taskModel.timeList![index],
+                    Text(widget.taskModel.timeMap!.values.elementAt(index),
                         textAlign: TextAlign.left,
                         style: GoogleFonts.merriweather(
                           fontSize: Theme.of(context)
@@ -214,10 +214,14 @@ class _NotificationDialogState extends State<NotificationDialog> {
                     const Spacer(),
                     IconButton(
                         onPressed: () async {
+                          int notificationId =
+                              widget.taskModel.timeMap!.keys.elementAt(index);
+                          String time =
+                              widget.taskModel.timeMap!.values.elementAt(index);
                           await TasksController().removeNotificationTime(
                               taskId: widget.taskModel.taskId,
-                              time: widget.taskModel.timeList![index]);
-                          widget.taskModel.timeList!.removeAt(index);
+                              notificationId: notificationId,
+                              time: time);
 
                           setState(() {});
                         },

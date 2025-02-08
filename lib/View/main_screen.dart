@@ -1,9 +1,11 @@
 import "dart:developer";
 
 import "package:flutter/material.dart";
+import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import "package:google_fonts/google_fonts.dart";
 import "package:provider/provider.dart";
 import "package:slideable/slideable.dart";
+import "package:task_manager/Controller/notification_service.dart";
 import "package:task_manager/Controller/tasks_controller.dart";
 import "package:task_manager/Controller/theme_controller.dart";
 import "package:task_manager/Model/task_model.dart";
@@ -27,25 +29,26 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     TasksController taskController = Provider.of<TasksController>(context);
-    ThemeController themeController = Provider.of<ThemeController>(context);
+    // ThemeController themeController = Provider.of<ThemeController>(context);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           leading: IconButton(
               onPressed: () {
-                themeController.changeTheme();
+                setState(() {});
               },
-              icon: Icon(
-                Icons.lightbulb,
-                color:
-                    (themeController.darkTheme) ? Colors.white : Colors.yellow,
-              )),
+              icon: const Icon(Icons.refresh)),
           actions: [
-            IconButton(
-                onPressed: () {
-                  setState(() {});
-                },
-                icon: const Icon(Icons.refresh))
+            Builder(builder: (context) {
+              return IconButton(
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                  icon: const Icon(
+                    Icons.menu,
+                    color: Colors.white,
+                  ));
+            })
           ],
           title: Text(
             "My Task Manager",
@@ -56,11 +59,58 @@ class _MainScreenState extends State<MainScreen> {
             await displayBottomSheet(
                 taskid: getUniqueId(),
                 forEdit: false,
-                notifyList: [],
+                notifyMap: {},
                 taskController: taskController);
           },
           child: const Icon(Icons.add),
         ),
+        endDrawer: Drawer(
+            width: MediaQuery.of(context).size.width / 2,
+            backgroundColor: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  TextButton(
+                      onPressed: () {},
+                      style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                      child: Text("Dark Mode",
+                          style: Theme.of(context).textTheme.displayMedium)),
+                  TextButton(
+                      onPressed: () {},
+                      style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                      child: Text("Clear Data",
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.displayMedium)),
+                  TextButton(
+                      onPressed: () async {
+                        await NotificationService().requestExactPermission();
+                      },
+                      style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                      child: Text("Grant Notifications",
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.displayMedium)),
+                  const Spacer(),
+                  TextButton(
+                      onPressed: () {},
+                      style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                      child: Text("About",
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.displayMedium)),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+            )),
         body: Padding(
           padding: const EdgeInsets.all(15),
           child: FutureBuilder<List<TaskModel>>(
@@ -100,8 +150,8 @@ class _MainScreenState extends State<MainScreen> {
                                         taskController: taskController,
                                         taskid: taskList[index].taskId,
                                         title: taskList[index].taskName,
-                                        notifyList:
-                                            taskList[index].timeList ?? [],
+                                        notifyMap:
+                                            taskList[index].timeMap ?? {},
                                         description:
                                             taskList[index].taskDescription ??
                                                 "",
@@ -199,7 +249,7 @@ class _MainScreenState extends State<MainScreen> {
     String title = '',
     String description = '',
     required String taskid,
-    required List<String> notifyList,
+    required Map<int,String> notifyMap,
     String date = '',
   }) async {
     await showModalBottomSheet(
@@ -212,14 +262,14 @@ class _MainScreenState extends State<MainScreen> {
             forEdit: forEdit,
             taskController: taskController,
             title: title,
-            notifyList: notifyList,
+            notifyMap: notifyMap,
             description: description,
             date: date,
             taskid: taskid,
           );
         } else {
           return MyBottomsheet(
-              notifyList: notifyList,
+              notifyMap: notifyMap,
               taskid: taskid,
               forEdit: forEdit,
               taskController: taskController);

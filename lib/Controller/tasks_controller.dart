@@ -6,7 +6,9 @@ import 'package:task_manager/Model/task_model.dart';
 
 class TasksController extends ChangeNotifier {
   Future<void> removeNotificationTime(
-      {required String taskId, required String time}) async {
+      {required String taskId,
+      required int notificationId,
+      required String time}) async {
     bool removed = await LocalData.removeNotificationTimeFromDatabase(
         taskId: taskId, timeToRemove: time);
     if (removed) {

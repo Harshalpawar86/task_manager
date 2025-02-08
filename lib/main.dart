@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/Controller/local_data.dart';
+import 'package:task_manager/Controller/notification_service.dart';
 import 'package:task_manager/Controller/tasks_controller.dart';
 import 'package:task_manager/Controller/theme_controller.dart';
 import 'package:task_manager/View/main_screen.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+  
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   await LocalData.startDatabase();
+  await NotificationService().initializeNotifications();
+  await NotificationService().requestPermission();
   runApp(const MainApp());
 }
 

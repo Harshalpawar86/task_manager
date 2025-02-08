@@ -34,10 +34,14 @@ class LocalData {
           conflictAlgorithm: ConflictAlgorithm.replace);
       log("Inserting Data return value : $ans");
       inserted = true;
+      List<Map<String, dynamic>> map = await localDb.query("TaskTable");
+      log("After inserting data ::::::::::::::$map");
     } catch (e) {
       log("Error Occured While Inserted : ${e.toString()}");
       inserted = false;
     }
+    log("Time Map ----------${obj.timeMap}");
+
     return inserted;
   }
 
@@ -46,34 +50,37 @@ class LocalData {
     try {
       final sqflite.Database localDb = await database;
       List<Map<String, dynamic>> taskList = await localDb.query("TaskTable");
-      log("${taskList.length}");
-      for (int i = 0; i < taskList.length; i++) {
-        String taskName = await taskList[i]['task_title'];
-        String date = await taskList[i]['task_date'];
-        String description = await taskList[i]['task_description'];
-        int isDone = await taskList[i]['is_completed'];
-        String taskId = await taskList[i]['task_id'];
-        String notifyTimeString = await taskList[i]['notify_time'] ?? "";
+      log("Total tasks fetched: ${taskList.length}");
+
+      for (var task in taskList) {
+        String taskName = task['task_title'];
+        String date = task['task_date'];
+        String description = task['task_description'] ?? "";
+        int isDone = task['is_completed'];
+        String taskId = task['task_id'];
+
+        // Convert notify_time string to Map<int, String>
+        String notifyTimeString = task['notify_time'] ?? "{}";
+        log("After retrieving :::::::::::::::::::$notifyTimeString");
+        Map<int, String> timeMap = TaskModel.jsonToTimeMap(notifyTimeString);
+        log("After retrieving & converting to map:::::::::::::::::::$timeMap");
+        log("Map While retrieving : $timeMap");
+
         TaskModel obj = TaskModel(
-            taskName: taskName,
-            taskId: taskId,
-            isDone: isDone,
-            date: date,
-            timeList: convertTextToTimeList(notifyTimeString),
-            taskDescription: description);
+          taskName: taskName,
+          taskId: taskId,
+          isDone: isDone,
+          date: date,
+          timeMap: timeMap,
+          taskDescription: description,
+        );
+
         modelList.add(obj);
       }
     } catch (e) {
-      log("$e");
+      log("Error in getTasks: $e");
     }
     return modelList;
-  }
-
-  static List<String> convertTextToTimeList(String? timeListString) {
-    if (timeListString == null || timeListString.isEmpty) {
-      return [];
-    }
-    return timeListString.split(',').map((e) => e.trim()).toList();
   }
 
   static Future<bool> updateTask(TaskModel obj) async {

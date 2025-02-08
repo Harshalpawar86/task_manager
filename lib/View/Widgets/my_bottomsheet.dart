@@ -1,11 +1,14 @@
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:task_manager/Controller/notification_service.dart';
 import 'package:task_manager/Controller/tasks_controller.dart';
 import 'package:task_manager/Model/task_model.dart';
 import 'package:uuid/uuid.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class MyBottomsheet extends StatefulWidget {
   final bool forEdit;
@@ -14,11 +17,11 @@ class MyBottomsheet extends StatefulWidget {
   final String description;
   final String date;
   final String taskid;
-  final List<String> notifyList;
+  final Map<int, String> notifyMap;
   const MyBottomsheet({
     super.key,
     required this.forEdit,
-    required this.notifyList,
+    required this.notifyMap,
     required this.taskController,
     this.title = '',
     this.description = '',
@@ -239,7 +242,7 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                         child: SizedBox(
                           height: 35,
                           child: ListView.builder(
-                              itemCount: widget.notifyList.length,
+                              itemCount: widget.notifyMap.length,
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) {
@@ -251,7 +254,7 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                                     decoration: BoxDecoration(
                                         color: Colors.blue.shade100),
                                     child: Text(
-                                      widget.notifyList[index],
+                                      "${widget.notifyMap[widget.notifyMap.keys.elementAt(index)]}",
                                       style: Theme.of(context)
                                           .textTheme
                                           .displayMedium,
@@ -275,7 +278,18 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                                 String formattedTime =
                                     MaterialLocalizations.of(context)
                                         .formatTimeOfDay(selectedTime);
-                                widget.notifyList.add(formattedTime);
+                                //get date to convert to TZDateTime
+                                String date = _dateController.text;
+                                tz.TZDateTime? scheduleTime =
+                                    convertToTZDateTime(date, formattedTime);
+                                int? notificationId =
+                                    getUniqueNotificationId(scheduleTime);
+                                widget.notifyMap
+                                    .addAll({notificationId: formattedTime});
+                                log("Notification Id --------$notificationId");
+                                // scheduleTime = null;
+                                // notificationId = null;
+                                // formattedTime = null;
                                 setState(() {});
                               }
                             }
@@ -295,7 +309,7 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                                 taskName: _titleController.text,
                                 isDone: 0, //false
                                 date: _dateController.text,
-                                timeList: widget.notifyList,
+                                timeMap: widget.notifyMap,
                                 taskDescription: _descriptionController.text);
                             log("Description Controller : ${_descriptionController.text}");
                             await widget.taskController
@@ -306,10 +320,12 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
                                 taskName: _titleController.text,
                                 isDone: 0, //false
                                 date: _dateController.text,
-                                timeList: widget.notifyList,
+                                timeMap: widget.notifyMap,
                                 taskDescription: _descriptionController.text);
                             await widget.taskController
                                 .addTask(taskModelObj: taskModelObj);
+                            await NotificationService()
+                                .setNotifications(taskModelObj);
                             _clearControllers();
                           }
                           if (context.mounted) {
@@ -341,6 +357,26 @@ class _MyBottomsheetState extends State<MyBottomsheet> {
         );
       },
     );
+  }
+
+  tz.TZDateTime convertToTZDateTime(String date, String time) {
+    DateTime parsedDate = DateFormat("dd/MM/yyyy").parse(date);
+    DateTime parsedTime = DateFormat("h:mm a").parse(time);
+
+    DateTime combinedDateTime = DateTime(
+      parsedDate.year,
+      parsedDate.month,
+      parsedDate.day,
+      parsedTime.hour,
+      parsedTime.minute,
+    );
+
+    return tz.TZDateTime.from(combinedDateTime, tz.local);
+  }
+
+  int getUniqueNotificationId(tz.TZDateTime dateTime) {
+    int randomValue = math.Random().nextInt(10000);
+    return (dateTime.millisecondsSinceEpoch + randomValue).remainder(100000);
   }
 
   Future<TimeOfDay?> _selectTime() async {
